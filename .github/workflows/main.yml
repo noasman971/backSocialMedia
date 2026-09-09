@@ -1,0 +1,35 @@
+name: CI Backend
+
+on:
+  push:
+    branches: ['main', 'develop']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    name: Build, Lint & Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Vérification des types TypeScript
+        run: npx tsc --noEmit
+
+      - name: Linting du code
+        run: npm run lint
+
+      - name: Build de production
+        run: npm run build
