@@ -163,7 +163,7 @@ router.post("/posts", authenticate, upload.single("image"), handleCreatePost);
 router.get("/posts/:id", getPostById);
 router.delete("/posts/:id", authenticate, deletePost);
 
-// ==================== COMMENTS ====================
+// ==================== COMMENTS ===================
 
 router.post(
   "/posts/:id/comments",
