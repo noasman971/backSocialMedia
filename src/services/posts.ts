@@ -52,11 +52,19 @@ export async function handleCreatePost(req: Request, res: Response) {
     const { content } = req.body;
     const userId = (req as any).userId;
 
+    console.log(req);
+
+    if (typeof content !== "string" || content.trim().length === 0) {
+        return res.status(400).json({
+            error: "Le contenu du post est obligatoire",
+        });
+    }
+
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     const post = await prisma.post.create({
         data: {
-            content,
+            content: content.trim(),
             imageUrl,
             authorId: userId,
         },

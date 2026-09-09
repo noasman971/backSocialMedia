@@ -10,7 +10,17 @@ router.post(
     async (req: Request<{ id: string }>, res: Response) => {
         const { id } = req.params;
         const { content } = req.body;
-        const userId = (req as any).userId;
+        const userId = req.authorId;
+
+        const post = await prisma.post.findUnique({
+            where: { id },
+        });
+
+        if (!post) {
+            return res.status(404).json({
+                error: "Post introuvable",
+            });
+        }
 
         const comment = await prisma.comment.create({
             data: {
