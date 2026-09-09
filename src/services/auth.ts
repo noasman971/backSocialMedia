@@ -1,61 +1,41 @@
-import jwt, {JwtPayload} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-
 
 export interface AuthenticatedRequest extends Request {
   userId?: string;
 }
 
+const secret = process.env.JWT_SECRET;
 
-
-
-const JWT_SECRET: string | undefined = process.env.JWT_SECRET;
-
-if (JWT_SECRET === undefined) {
+if (secret === undefined) {
   throw new Error("FATAL: JWT_SECRET environment variable is missing.");
 }
 
-// Generate a token for a user with a 1-hour expiration
+const JWT_SECRET: string = secret;
+
 export function generateToken(userId: string): string {
-  if (JWT_SECRET === undefined) {
-    throw new Error("JWT secret is not configured.");
-  }
-  return jwt.sign({ userId}, JWT_SECRET, { expiresIn: "1h", algorithm: "HS256" });
+  return jwt.sign({ userId }, JWT_SECRET, { algorithm: "HS256" });
 }
 
 export function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const header:string|undefined = req.headers.authorization;
+  const header = req.headers.authorization;
 
   if (!header) {
     return res.status(401).json({ error: "No token provided" });
   }
 
-  const [scheme, token]: string[] = header.split(" ");
+  const [scheme, token] = header.split(" ");
 
   if (scheme !== "Bearer" || token === undefined) {
-    return res.status(401).json({
-      error: "Invalid authorization header",
-    });
-  }
-
-
-  if (JWT_SECRET === undefined) {
-    throw new Error("JWT secret is not configured.");
+    return res.status(401).json({ error: "Invalid authorization header" });
   }
 
   try {
-    const decoded: string | JwtPayload = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
 
-    if (typeof decoded === "string") {
+    if (typeof decoded === "string" || typeof decoded.userId !== "string") {
       return res.status(401).json({ error: "Invalid token" });
     }
-
-    if (
-        typeof decoded.userId !== "string"
-    ) {
-      return res.status(401).json({ error: "Invalid token payload" });
-    }
-
 
     req.userId = decoded.userId;
 

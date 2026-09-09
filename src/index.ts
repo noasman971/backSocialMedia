@@ -1,15 +1,14 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import fs from "fs";
 import path from "path";
-import dotenv from "dotenv";
 import postRouter from "./routes/posts";
 import authRouter from "./routes/auth";
 import userRouter from "./routes/users";
 import likesRouter from "./routes/likes";
 import commentRouter from "./routes/comments";
 
-dotenv.config();
 
 const uploadsDir = path.join(__dirname, "..", "uploads");
 if (!fs.existsSync(uploadsDir)) {
