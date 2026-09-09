@@ -1,4 +1,4 @@
-import {authenticate} from "../services/auth";
+import { authenticate, AuthenticatedRequest } from "../services/auth";
 import {Router} from "express";
 import prisma from "../prisma";
 
@@ -32,6 +32,18 @@ router.delete(
         const { id } = req.params;
 
         await prisma.comment.delete({ where: { id } });
+        const comment = await prisma.comment.findUnique({
+            where: { id },
+            include: {
+                post: true,
+            },
+        });
+        if (
+            comment.authorId !== req.userId &&
+            comment.post.authorId !== req.userId
+        ) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
 
         res.json({ success: true });
     }
