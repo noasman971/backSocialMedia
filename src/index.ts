@@ -23,7 +23,17 @@ app.use(
     })
 );
 app.use(express.json());
-app.use("/uploads", express.static(uploadsDir));
+app.use(
+    "/uploads",
+    express.static(uploadsDir, {
+        setHeaders: (res) => {
+            res.setHeader("X-Content-Type-Options", "nosniff");
+            res.setHeader("Content-Security-Policy", "default-src 'none'");
+        },
+        dotfiles: "deny",
+        index: false,
+    })
+);
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use(postRouter);

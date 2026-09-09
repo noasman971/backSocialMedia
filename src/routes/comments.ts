@@ -1,6 +1,7 @@
 import { Response, Router } from "express";
 import { authenticate, AuthenticatedRequest } from "../services/auth";
 import prisma from "../prisma";
+import {publicUserSelect} from "../services/users";
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.post(
 
         const comment = await prisma.comment.create({
             data: { content, postId: id, authorId: userId },
-            include: { author: true },
+            include: { author: { select: publicUserSelect } },
         });
 
         res.json(comment);
