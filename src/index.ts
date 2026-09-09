@@ -3,7 +3,11 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-import router from "./routes";
+import postRouter from "./routes/posts";
+import authRouter from "./routes/auth";
+import userRouter from "./routes/users";
+import likesRouter from "./routes/likes";
+import commentRouter from "./routes/comments";
 
 dotenv.config();
 
@@ -19,7 +23,11 @@ app.use(express.json());
 app.use("/uploads", express.static(uploadsDir));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-app.use(router);
+app.use(postRouter);
+app.use(authRouter);
+app.use(userRouter);
+app.use(likesRouter);
+app.use(commentRouter);
 
 const PORT = process.env.PORT || 3000;
 
