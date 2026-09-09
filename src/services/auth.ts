@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from "express";
 
 export interface AuthenticatedRequest extends Request {
   userId?: string;
-  userRole?: string;
 }
 
 
@@ -17,11 +16,11 @@ if (JWT_SECRET === undefined) {
 }
 
 // Generate a token for a user with a 1-hour expiration
-export function generateToken(userId: string, role: string): string {
+export function generateToken(userId: string): string {
   if (JWT_SECRET === undefined) {
     throw new Error("JWT secret is not configured.");
   }
-  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: "1h", algorithm: "HS256" });
+  return jwt.sign({ userId}, JWT_SECRET, { expiresIn: "1h", algorithm: "HS256" });
 }
 
 export function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -52,15 +51,13 @@ export function authenticate(req: AuthenticatedRequest, res: Response, next: Nex
     }
 
     if (
-        typeof decoded.userId !== "string" ||
-        typeof decoded.role !== "string"
+        typeof decoded.userId !== "string"
     ) {
       return res.status(401).json({ error: "Invalid token payload" });
     }
 
 
     req.userId = decoded.userId;
-    req.userRole = decoded.role;
 
     next();
   } catch (err) {
