@@ -2,64 +2,55 @@ import multer from "multer";
 import { Request, Response } from "express";
 import path from "path";
 import prisma from "../prisma";
-import {AuthenticatedRequest} from "./auth";
+import { AuthenticatedRequest } from "./auth";
+import { publicUserSelect } from "./users";
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (_req, _file, cb) => {
         cb(null, path.join(__dirname, "..", "uploads"));
     },
-    filename: (req, file, cb) => {
+    filename: (_req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
     },
 });
 export const upload = multer({ storage });
 
-
-
 // get the feed of all posts, most recent first
-export async function getPosts(req: Request, res: Response) {
+export async function getPosts(_req: Request, res: Response) {
     const posts = await prisma.post.findMany({
         orderBy: { createdAt: "desc" },
+        include: {
+            author: { select: publicUserSelect },
+            _count: { select: { likes: true, comments: true } },
+        },
     });
 
-    const feed = [];
-
-    for (const post of posts) {
-        // get the author from the database
-        const author = await prisma.user.findUnique({
-            where: { id: post.authorId },
-        });
-        const likeCount = await prisma.like.count({ where: { postId: post.id } });
-        const commentCount = await prisma.comment.count({
-            where: { postId: post.id },
-        });
-
-        feed.push({
-            id: post.id,
-            content: post.content,
-            imageUrl: post.imageUrl,
-            created_at: post.createdAt,
-            author: author ? { id: author.id, username: author.username } : null,
-            likeCount,
-            commentCount,
-        });
-    }
+    const feed = posts.map((post) => ({
+        id: post.id,
+        content: post.content,
+        imageUrl: post.imageUrl,
+        created_at: post.createdAt,
+        author: post.author,
+        likeCount: post._count.likes,
+        commentCount: post._count.comments,
+    }));
 
     res.json(feed);
 }
 
-export async function handleCreatePost(req: Request, res: Response) {
+export async function handleCreatePost(req: AuthenticatedRequest, res: Response) {
     const { content } = req.body;
-    const userId = (req as any).userId;
+    const userId = req.userId;
+
+    if (!userId) {
+        return res.status(401).json({ error: "Non authentifié" });
+    }
 
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     const post = await prisma.post.create({
-        data: {
-            content,
-            imageUrl,
-            authorId: userId,
-        },
+        data: { content, imageUrl, authorId: userId },
+        include: { author: { select: publicUserSelect } },
     });
 
     res.json(post);
@@ -71,18 +62,18 @@ export async function getPostById(req: Request<{ id: string }>, res: Response) {
     const post = await prisma.post.findUnique({
         where: { id },
         include: {
-            author: true,
+            author: { select: publicUserSelect },
             comments: {
-                include: { author: true },
+                include: { author: { select: publicUserSelect } },
                 orderBy: { createdAt: "asc" },
             },
+            _count: { select: { likes: true } },
         },
     });
+
     if (!post) {
         return res.status(404).json({ error: "Post introuvable" });
     }
-
-    const likeCount = await prisma.like.count({ where: { postId: id } });
 
     res.json({
         id: post.id,
@@ -91,38 +82,6 @@ export async function getPostById(req: Request<{ id: string }>, res: Response) {
         createdAt: post.createdAt,
         author: post.author,
         comments: post.comments,
-        likeCount,
+        likeCount: post._count.likes,
     });
-}
-
-
-
-export async function deletePost(req: AuthenticatedRequest, res: Response) {
-    const { id } = req.params;
-    const userId = req.userId;
-
-    if (typeof id !== "string") {
-        return res.status(400).json({ error: "Identifiant invalide" });
-    }
-
-    if (!userId) {
-        return res.status(401).json({ error: "Non authentifié" });
-    }
-
-    const post = await prisma.post.findUnique({
-        where: { id },
-        select: { authorId: true },
-    });
-
-    if (!post) {
-        return res.status(404).json({ error: "Post introuvable" });
-    }
-
-    if (post.authorId !== userId) {
-        return res.status(403).json({ error: "Interdit" });
-    }
-
-    await prisma.post.delete({ where: { id } });
-
-    res.json({ success: true });
 }
