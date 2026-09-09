@@ -24,7 +24,7 @@ router.post("/auth/register", async (req: Request, res: Response) => {
         },
     });
 
-    const token = generateToken(user.id, user.role);
+    const token = generateToken(user.id);
     res.json({
         token,
         user: { id: user.id, email: user.email, username: user.username },
