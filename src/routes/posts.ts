@@ -1,6 +1,6 @@
 import {authenticate} from "../services/auth";
 import {Router} from "express";
-import {upload} from "../services/posts";
+import {deletePost, getPostById, getPosts, handleCreatePost, upload} from "../services/posts";
 
 const router = Router();
 
