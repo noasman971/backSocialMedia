@@ -10,6 +10,16 @@ router.post(
         const { id } = req.params;
         const userId = (req as any).userId;
 
+        const post = await prisma.post.findUnique({
+            where: { id },
+        });
+
+        if (!post) {
+            return res.status(404).json({
+                error: "Post introuvable",
+            });
+        }
+
         const like = await prisma.like.create({
             data: {
                 postId: id,
