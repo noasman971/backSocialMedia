@@ -1,19 +1,19 @@
-import { Router, Request, Response } from "express";
-import { authenticate } from "../services/auth";
+import { Router, Response } from "express";
+import { authenticate, AuthenticatedRequest } from "../services/auth";
 import prisma from "../prisma";
 
 const router = Router();
 
-interface AuthRequest extends Request<{ id: string }> {
-    authorId: string;
-}
-
 router.post(
     "/posts/:id/like",
     authenticate,
-    async (req: AuthRequest, res: Response) => {
+    async (req: AuthenticatedRequest, res: Response) => {
         const { id } = req.params;
-        const userId = req.authorId;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Non authentifié" });
+        }
 
         const post = await prisma.post.findUnique({
             where: { id },
@@ -39,9 +39,13 @@ router.post(
 router.delete(
     "/posts/:id/like",
     authenticate,
-    async (req: AuthRequest, res: Response) => {
+    async (req: AuthenticatedRequest, res: Response) => {
         const { id } = req.params;
-        const userId = req.authorId;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Non authentifié" });
+        }
 
         const like = await prisma.like.findFirst({
             where: {
@@ -51,7 +55,7 @@ router.delete(
         });
 
         if (!like) {
-            return res.status(200).json({
+            return res.status(404).json({
                 error: "Like not found",
             });
         }
@@ -71,9 +75,13 @@ router.delete(
 router.get(
     "/posts/:id/like",
     authenticate,
-    async (req: AuthRequest, res: Response) => {
+    async (req: AuthenticatedRequest, res: Response) => {
         const { id } = req.params;
-        const userId = req.authorId;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Non authentifié" });
+        }
 
         const like = await prisma.like.findFirst({
             where: {
@@ -89,4 +97,3 @@ router.get(
 );
 
 export default router;
-

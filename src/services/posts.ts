@@ -40,7 +40,7 @@ export async function getPosts(_req: Request, res: Response) {
 
 export async function handleCreatePost(req: AuthenticatedRequest, res: Response) {
     const { content } = req.body;
-    const userId = req.authorId;
+    const userId = req.userId;
 
     if (!userId) {
         return res.status(401).json({ error: "Non authentifié" });

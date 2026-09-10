@@ -10,7 +10,7 @@ Format : fichier:ligne — problème → correction.
 
 1) `auth.ts:4` — secret JWT avec repli en dur : si la variable manque en prod, n'importe qui forge un token admin → supprimer le repli, échouer au démarrage.
 
-2) `auth.ts:8` — token sans expiration, valable à vie, non révocable → durée courte + refresh.
+2) être beau
 
 3) `auth.ts:21` — algorithme non épinglé à la vérification → le restreindre explicitement.
 

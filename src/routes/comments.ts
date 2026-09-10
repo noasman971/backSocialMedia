@@ -11,7 +11,7 @@ router.post(
     async (req: AuthenticatedRequest, res: Response) => {
         const { id } = req.params;
         const { content } = req.body;
-        const userId = req.authorId;
+        const userId = req.userId;
 
         if (typeof id !== "string") {
             return res.status(400).json({ error: "Identifiant invalide" });
