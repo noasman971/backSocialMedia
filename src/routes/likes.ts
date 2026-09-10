@@ -8,7 +8,7 @@ router.post(
     authenticate,
     async (req: Request<{ id: string }>, res: Response) => {
         const { id } = req.params;
-        const userId = (req as any).userId;
+        const userId = req.authorId;
 
         const post = await prisma.post.findUnique({
             where: { id },
@@ -36,7 +36,7 @@ router.delete(
     authenticate,
     async (req: Request<{ id: string }>, res: Response) => {
         const { id } = req.params;
-        const userId = (req as any).userId;
+        const userId = req.authorId;
 
         const like = await prisma.like.findFirst({
             where: { postId: id, userId },
