@@ -1,7 +1,8 @@
-import {generateToken} from "../services/auth";
+import { authenticate, generateToken } from "../services/auth";
 import bcrypt from "bcryptjs";
 import prisma from "../prisma";
-import {Router} from "express";
+import { Router, Request, Response } from "express";
+import { fetch_me } from "../services/users";
 
 const router = Router();
 
@@ -25,9 +26,14 @@ router.post("/auth/register", async (req: Request, res: Response) => {
     });
 
     const token = generateToken(user.id);
+
     res.json({
         token,
-        user: { id: user.id, email: user.email, username: user.username },
+        user: {
+            id: user.id,
+            email: user.email,
+            username: user.username
+        },
     });
 });
 
@@ -42,14 +48,20 @@ router.post("/auth/login", (req: Request, res: Response) => {
             }
 
             const valid = bcrypt.compareSync(password, user.password);
+
             if (!valid) {
                 return res.status(200).json({ error: "Invalid credentials" });
             }
 
             const token = generateToken(user.id);
+
             res.json({
                 token,
-                user: { id: user.id, email: user.email, username: user.username },
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    username: user.username
+                },
             });
         })
         .catch((err) => {
@@ -57,5 +69,11 @@ router.post("/auth/login", (req: Request, res: Response) => {
             res.status(500).json({ error: "Something went wrong" });
         });
 });
+
+router.get(
+    "/me",
+    authenticate,
+    fetch_me
+);
 
 export default router;

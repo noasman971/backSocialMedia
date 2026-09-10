@@ -58,7 +58,6 @@ router.delete(
             where: { id },
             select: {
                 authorId: true,
-                post: { select: { authorId: true } },
             },
         });
 
@@ -66,10 +65,7 @@ router.delete(
             return res.status(404).json({ error: "Commentaire introuvable" });
         }
 
-        if (
-            comment.authorId !== userId &&
-            comment.post.authorId !== userId
-        ) {
+        if (comment.authorId !== userId) {
             return res.status(403).json({ error: "Interdit" });
         }
 
