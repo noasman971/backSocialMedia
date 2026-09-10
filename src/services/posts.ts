@@ -40,13 +40,11 @@ export async function getPosts(_req: Request, res: Response) {
 
 export async function handleCreatePost(req: AuthenticatedRequest, res: Response) {
     const { content } = req.body;
-    const userId = req.userId;
+    const userId = req.authorId;
 
     if (!userId) {
         return res.status(401).json({ error: "Non authentifié" });
     }
-
-    console.log(req);
 
     if (typeof content !== "string" || content.trim().length === 0) {
         return res.status(400).json({
@@ -57,7 +55,11 @@ export async function handleCreatePost(req: AuthenticatedRequest, res: Response)
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     const post = await prisma.post.create({
-        data: { content, imageUrl, authorId: userId },
+        data: {
+            content: content.trim(),
+            imageUrl,
+            authorId: userId,
+        },
         include: { author: { select: publicUserSelect } },
     });
 
