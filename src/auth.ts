@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 
-// generate a token for a user, no expiration
+// generate a token for a user, no expiration.
 export function generateToken(userId: string, role: string): string {
   return jwt.sign({ userId, role }, JWT_SECRET);
 }
