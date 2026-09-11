@@ -59,7 +59,7 @@ app.use((req, res) => {
 });
 
 // Gestion globale des erreurs
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, req: express.Request, res: express.Response) => {
     console.error(err);
 
     res.status(500).json({

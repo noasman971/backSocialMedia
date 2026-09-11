@@ -10,12 +10,6 @@ const FIRST_NAMES = [
   "Zoe", "Adam", "Bianca", "Camille", "Diego", "Elise",
 ];
 
-const LAST_NAMES = [
-  "Martin", "Bernard", "Dubois", "Thomas", "Robert", "Petit", "Durand",
-  "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Michel", "Garcia",
-  "David", "Bertrand", "Roux", "Vincent", "Fournier", "Morel",
-];
-
 const CAPTIONS = [
   "Belle journée aujourd'hui !",
   "Petit café du matin ☕",
@@ -96,7 +90,6 @@ async function main() {
 
   for (let i = 0; i < 47; i++) {
     const first = randomItem(FIRST_NAMES);
-    const last = randomItem(LAST_NAMES);
     const username = `${first.toLowerCase()}${randomInt(1, 999)}`;
     const email = `${username}@test.com`;
 
