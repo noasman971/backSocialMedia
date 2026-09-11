@@ -15,6 +15,12 @@ router.post(
             return res.status(401).json({ error: "Non authentifié" });
         }
 
+        if (typeof id !== "string") {
+            return res.status(400).json({
+                error: "ID de post invalide",
+            });
+        }
+
         const post = await prisma.post.findUnique({
             where: { id },
         });
@@ -45,6 +51,12 @@ router.delete(
 
         if (!userId) {
             return res.status(401).json({ error: "Non authentifié" });
+        }
+
+        if (typeof id !== "string") {
+            return res.status(400).json({
+                error: "ID de post invalide",
+            });
         }
 
         const like = await prisma.like.findFirst({
@@ -81,6 +93,12 @@ router.get(
 
         if (!userId) {
             return res.status(401).json({ error: "Non authentifié" });
+        }
+
+        if (typeof id !== "string") {
+            return res.status(400).json({
+                error: "ID de post invalide",
+            });
         }
 
         const like = await prisma.like.findFirst({
